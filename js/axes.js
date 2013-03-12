@@ -62,7 +62,7 @@ var mediaPlayer = {
   },
 
     addBandcampBandIds: function(results) {
-        console.log('loading bandcamp bands...');
+        // console.log('loading bandcamp bands...');
         for (var b in results.results) {
             var band = results.results[b];
             mediaPlayer.bandcampBands.push(band.band_id);
@@ -70,7 +70,7 @@ var mediaPlayer = {
     },
 
     addBandcampAlbumIds: function(results) {
-        console.log('loading bandcamp albums...');
+        // console.log('loading bandcamp albums...');
         for (var a in results.discography) {
             var album = results.discography[a];
             mediaPlayer.bandcampAlbums.push(album.album_id);
@@ -78,7 +78,7 @@ var mediaPlayer = {
     },
 
     addBandcampTracks: function(results) {
-        console.log('loading bandcamp tracks...');
+        // console.log('loading bandcamp tracks...');
         for (var t in results.tracks) {
             var track = results.tracks[t];
             var playlistTrack = {
@@ -111,11 +111,11 @@ var mediaPlayer = {
             url += param + "=" + params[param]
         }
 
-        console.log(url);
+        // console.log(url);
 
         if (this.cache[url]) {
             mediaPlayer.log(url + ' loaded from cache');
-            mediaPlayer.hideLoading();
+            // mediaPlayer.hideLoading();
             callback(this.cache[url]);
         } else {
             $.ajax({
@@ -138,10 +138,11 @@ var mediaPlayer = {
 }
 
 mediaPlayer.loadBandcampTracks(function(tracks) {
-  // track variable is now an array of track objects
-  for (var t in tracks) {
-    var track = tracks[t];
-    // do something with track.mp3
-    console.log(track.mp3);
-  }
+  var arrLen = tracks.length;
+  var randTrack = Math.floor(Math.random() * arrLen);
+  var $randTrack = tracks[randTrack];
+  console.log($randTrack);
+  $('#stage').append('<figure><img src="' + $randTrack.poster + '" /><figcaption><h3>' + $randTrack.title + '</h3><p>' + $randTrack.albumName + '</p></figcaption></figure>');
+  $('#stage').append('<audio src="' + $randTrack.mp3 + '" controls="true" />');
+  // }
 });
