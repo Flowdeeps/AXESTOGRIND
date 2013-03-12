@@ -5,6 +5,7 @@
 
 var mediaPlayer = {
   /* bandcamp vars */
+  bandName: 3766815619,
   bandcampApiKey: 'vatnajokull',
   bandcampDomain: 'http://api.bandcamp.com/api',
   bandcampBands: [],
@@ -129,9 +130,6 @@ var mediaPlayer = {
     },    _send: function(url, params, dataType, callback) {
         var first = true;
     
-        // show loading page
-        mediaPlayer.showLoading();
-
         for (param in params) {
             url += (first) ? '?' : '&';
             first=false;
@@ -163,3 +161,10 @@ var mediaPlayer = {
     },
 
 }
+mediaPlayer.loadBandcampTracks($('#stage').val(), function(tracks) {
+  // track variable is now an array of track objects
+  for (var t in tracks) {
+    var track = tracks[t];
+    // do something with track.mp3
+  }
+});
