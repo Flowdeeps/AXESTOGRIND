@@ -5,10 +5,10 @@
 
 var mediaPlayer = {
   /* bandcamp vars */
-  bandName: 3766815619,
+  // bandName: 3766815619,
   bandcampApiKey: 'vatnajokull',
   bandcampDomain: 'http://api.bandcamp.com/api',
-  bandcampBands: [],
+  bandcampBands: [3766815619],
   bandcampAlbums: [],
   bandcampTracks: [],
   bandcampImages: [],
@@ -24,6 +24,7 @@ var mediaPlayer = {
   allEvents: [],
   allLinks: [],
   allImages: [],
+  cache: {},
   /**
    * Bandcamp functions
    *
@@ -36,56 +37,10 @@ var mediaPlayer = {
       bandParams['name'] = bandName;
       bandParams['callback'] = 'mediaPlayer.addBandcampBandIds';
 
-      /* get all matching bands */
-      mediaPlayer._sendBandcamp(bandEndpoint, bandParams, function(band_results) {
-          //eval(band_results);
-          mediaPlayer.addBandcampBandIds(band_results);
-
-          var albumEndpoint = 'band/3/discography';
-          var albumParams = [];
-          var bandIdsString = mediaPlayer.bandcampBands.join(',');
-
-          albumParams['band_id'] = bandIdsString;
-          albumParams['callback'] = 'mediaPlayer.addBandcampAlbumIds';
-   
-          /* get all albums for all matching bands */
-          mediaPlayer._sendBandcamp(albumEndpoint, albumParams, function(album_results) {
-              //eval(album_results);
-              
-              if (typeof album_results.discography == 'undefined') {
-                  callback();
-                  return false;
-              }
-
-              mediaPlayer.addBandcampAlbumIds(album_results);
-
-              var total_albums = album_results.discography.length;
-              var processed = 0;
-
-              for (var a in album_results.discography) {
-                  var albumInfoEndpoint = "album/3/info";
-                  var albumInfoParams = [];
-                  albumInfoParams['album_id'] = album_results.discography[a].album_id;
-                  albumInfoParams['callback'] = 'mediaPlayer.addBandcampTracks';
-              
-                  /* get album info (track ids) */
-                  (function(total_albums) {
-                      mediaPlayer._sendBandcamp(albumInfoEndpoint, albumInfoParams, function(track_results) {
-                          //eval(track_results);
-                          mediaPlayer.addBandcampTracks(track_results);
-                          processed++;
-                          if (processed == total_albums) {
-                              callback(mediaPlayer.bandcampTracks);
-                          }
-                      }); 
-                  })(total_albums);
-              }
-          });
-      });
     },
 
     addBandcampBandIds: function(results) {
-        mediaPlayer.log('loading bandcamp bands...');
+        console.log('loading bandcamp bands...');
         for (var b in results.results) {
             var band = results.results[b];
             mediaPlayer.bandcampBands.push(band.band_id);
@@ -93,7 +48,7 @@ var mediaPlayer = {
     },
 
     addBandcampAlbumIds: function(results) {
-        mediaPlayer.log('loading bandcamp albums...');
+        console.log('loading bandcamp albums...');
         for (var a in results.discography) {
             var album = results.discography[a];
             mediaPlayer.bandcampAlbums.push(album.album_id);
@@ -101,7 +56,7 @@ var mediaPlayer = {
     },
 
     addBandcampTracks: function(results) {
-        mediaPlayer.log('loading bandcamp tracks...');
+        console.log('loading bandcamp tracks...');
         for (var t in results.tracks) {
             var track = results.tracks[t];
             var popularity = mediaPlayer.isTopTrack('', track.title);
@@ -136,7 +91,7 @@ var mediaPlayer = {
             url += param + "=" + params[param]
         }
 
-        mediaPlayer.log(url);
+        console.log(url);
 
         if (this.cache[url]) {
             mediaPlayer.log(url + ' loaded from cache');
@@ -149,7 +104,7 @@ var mediaPlayer = {
                 dataType: dataType,
                 success: function(response) {
                     mediaPlayer.cache[url] = response
-                    mediaPlayer.hideLoading();
+                    // mediaPlayer.hideLoading();
                     callback(response);
                 },
                 error: function(errorObj, textStatus, errorMsg) {
