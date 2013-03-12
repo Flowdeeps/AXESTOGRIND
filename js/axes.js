@@ -13,17 +13,7 @@ var mediaPlayer = {
   bandcampTracks: [],
   bandcampImages: [],
   /* properties */
-  filterByTopSongs: false,
-  filterBySongs: true,
-  logSkipped: false,
   debug: true,
-  allTrackTitles: [],
-  allBios: [],
-  allSimilar: [],
-  allReviews: [],
-  allEvents: [],
-  allLinks: [],
-  allImages: [],
   cache: {},
   /**
    * Bandcamp functions
