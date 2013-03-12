@@ -29,15 +29,47 @@ var mediaPlayer = {
    * Bandcamp functions
    *
    */
-  loadBandcampTracks: function(bandName, callback) {
-      var bandEndpoint = "band/3/search"
-      var bandParams = [];
+  loadBandcampTracks: function(callback) {
+    var albumEndpoint = 'band/3/discography';
+    var albumParams = [];
+    var bandIdsString = mediaPlayer.bandcampBands.join(',');
 
-      bandParams['name'] = encodeURIComponent(bandName);
-      bandParams['name'] = bandName;
-      bandParams['callback'] = 'mediaPlayer.addBandcampBandIds';
+    albumParams['band_id'] = bandIdsString;
+    albumParams['callback'] = 'mediaPlayer.addBandcampAlbumIds';
+ 
+    /* get all albums for all matching bands */
+    mediaPlayer._sendBandcamp(albumEndpoint, albumParams, function(album_results) {
+      //eval(album_results);
+      
+      if (typeof album_results.discography == 'undefined') {
+          callback();
+          return false;
+      }
 
-    },
+      mediaPlayer.addBandcampAlbumIds(album_results);
+
+      var total_albums = album_results.discography.length;
+      var processed = 0;
+
+      for (var a in album_results.discography) {
+        var albumInfoEndpoint = "album/2/info";
+        var albumInfoParams = [];
+        albumInfoParams['album_id'] = album_results.discography[a].album_id;
+        albumInfoParams['callback'] = 'mediaPlayer.addBandcampTracks';
+        
+        /* get album info (track ids) */
+        (function(total_albums) {
+          mediaPlayer._sendBandcamp(albumInfoEndpoint, albumInfoParams, function(track_results) {
+            mediaPlayer.addBandcampTracks(track_results);
+            processed++;
+            if (processed == total_albums) {
+              callback(mediaPlayer.bandcampTracks);
+            }
+          }); 
+        })(total_albums);
+      }
+    });
+  },
 
     addBandcampBandIds: function(results) {
         console.log('loading bandcamp bands...');
@@ -59,14 +91,12 @@ var mediaPlayer = {
         console.log('loading bandcamp tracks...');
         for (var t in results.tracks) {
             var track = results.tracks[t];
-            var popularity = mediaPlayer.isTopTrack('', track.title);
             var playlistTrack = {
                 'artist': '',
                 'albumName': results.title,
                 'poster': results.large_art_url,
                 'title': track.title,
-                'mp3': track.streaming_url,
-                'popularity': popularity
+                'mp3': track.streaming_url
             };
             mediaPlayer.bandcampTracks.push(playlistTrack);
         }
@@ -116,10 +146,12 @@ var mediaPlayer = {
     },
 
 }
-mediaPlayer.loadBandcampTracks($('#stage').val(), function(tracks) {
+
+mediaPlayer.loadBandcampTracks(function(tracks) {
   // track variable is now an array of track objects
   for (var t in tracks) {
     var track = tracks[t];
     // do something with track.mp3
+    console.log(track.mp3);
   }
 });
